@@ -1,0 +1,2 @@
+../pntSrcId.py:16: RuntimeWarning: divide by zero encountered in log
+  return -np.log(result)

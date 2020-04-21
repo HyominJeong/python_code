@@ -1,0 +1,82 @@
+import numpy as np
+import sys, os
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import text
+
+def get1WF(wf_raw):
+  result = []
+  for k in range(len(wf_raw)):
+    result.extend(wf_raw[k].strip('\n').split())
+    #print result[-1]
+  #print result
+  for l in range(len(result)):
+    result[l] = int(result[l])
+  return np.array(result)
+
+WF_total = []
+XX_total = []
+YY_total = []
+clkcnt_total = []
+mclkcnt_total = []
+f = open(sys.argv[1])
+loop = True
+while(loop):
+  line = f.readline()
+  if (line.split()[0] == 'event_num'):
+    print f.readline()
+    print f.readline()
+    # Waveform data starts
+    while(1):
+      line_ = f.readline()
+      if (line_[:6] == 'rufptn'):
+        print len(WF_total), "waveforms collected"
+        loop = False
+        break
+      else:
+        # Position data
+        print line_
+        values = line_.split()
+        XX = values[2]
+        YY = values[3]
+        clkcnt = values[4]
+        mclkcnt = values[5]
+        print XX, YY, clkcnt, mclkcnt
+        XX_total.append(int(XX))
+        YY_total.append(int(YY))
+        clkcnt_total.append((clkcnt))
+        mclkcnt_total.append((mclkcnt))
+        print f.readline()
+        wf_raw_ = []
+        for j in range(11):
+          wf_raw_.append(f.readline())
+        #print wf_raw_
+        WF_LO = get1WF(wf_raw_)
+        #print WF, len(WF)
+        print f.readline()
+        wf_raw_ = []
+        for j in range(11):
+          wf_raw_.append(f.readline())
+        #print wf_raw_
+        WF_UP = get1WF(wf_raw_)
+        #print WF, len(WF)
+        WF_total.append([WF_UP,WF_LO])
+        #break
+
+print len(WF_total)
+
+# Start to plot
+x = np.arange(128)
+for i in range(len(WF_total)):
+  #print clkcnt[i], clkcnt[i]
+  plt.plot(x + 128 * i,WF_total[i][0] + 20 * i,'b-')
+  plt.plot(x + 128 * i,WF_total[i][1] + 20 * i,'r-')
+  #string = ("%02d%02d, %08s.%08s" % (XX_total[i],YY_total[i], clkcnt_total[i], mclkcnt_total[i]))
+  string = ("%02d%02d" % (XX_total[i],YY_total[i]))
+  plt.text(128 * i, 20 * i, string)
+
+
+plt.show()
+
+
+
+			
